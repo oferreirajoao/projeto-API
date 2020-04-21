@@ -7,7 +7,7 @@ const Carro = conexao.define('carro',
         // Objetos com os atributos 
         marca: Sequelize.TEXT,
         modelo: Sequelize.TEXT,
-        ano: Sequelize.INT,
+        ano: Sequelize.INTEGER,
         valor: Sequelize.DOUBLE,
         data_cadastro: Sequelize.DATE
     },
