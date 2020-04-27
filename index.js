@@ -57,10 +57,6 @@ server.patch(`${CARRO}/:id`, async (req, res) => {
     res.json(carroAtualizado)
 })
 
-// GET http://localhost:3000/ec021/carro?marca=XX => Read
-// GET http://localhost:3000/ec021/carro?marca=XX&modelo=XX => Read
-// GET http://localhost:3000/ec021/carro?anoInicial=XX => Read
-// GET http://localhost:3000/ec021/carro?valorInicial=XX => Read
 server.get(`${CARRO}`, async (req, res) => {
     let id = req.query.id
     let marca = req.query.marca
@@ -73,7 +69,6 @@ server.get(`${CARRO}`, async (req, res) => {
         res.json(carro)
     }
 
-    // Busca por MARCA & MODELO
     else if (marca && modelo) {
         let carro = await Carro.findAll(
             {
@@ -81,8 +76,8 @@ server.get(`${CARRO}`, async (req, res) => {
                 { 
                     [Op.and] :
                     [
-                        { marca : marca},
-                        { modelo : modelo}
+                        { marca : marca },
+                        { modelo : modelo }
                     ]
                 }
             }
@@ -133,7 +128,6 @@ server.get(`${CARRO}`, async (req, res) => {
     }
 
     else {
-        // Buscando TODOS os carros
         let carro = await Carro.findAll()
         res.json(carro)
     }   
