@@ -1,5 +1,8 @@
+const { Op } = require("sequelize")
+
 const restify = require("restify")
-const server = restify.createServer();
+
+const server = restify.createServer()
 
 const Carro = require("./models/Carro")
 
@@ -8,11 +11,8 @@ server.use(restify.plugins.bodyParser())
 
 const CARRO = '/ec021/carro'
 
-// POST http://localhost:3000/carro => Create
-// CRIAR
 server.post(`${CARRO}`, async (req, res) => {
 
-    // Variaveis para receber do "body" da requeste
     let marca = req.body.marca
     let modelo = req.body.modelo
     let ano = req.body.ano
@@ -27,13 +27,10 @@ server.post(`${CARRO}`, async (req, res) => {
         }
     )
 
-    // Verificando se o carro foi criado
     let carroCriado = await Carro.findByPk(carro.id)
     res.json(carroCriado)
 })
 
-// PATCH http://localhost:3000/carro => Update
-// ATUALIZAR
 server.patch(`${CARRO}/:id`, async (req, res) => {
     let id = req.params.id
     let marca = req.body.marca
@@ -49,97 +46,100 @@ server.patch(`${CARRO}/:id`, async (req, res) => {
             valor:valor
         },
         {
-            where: {id: id}
+            where: 
+            {
+                id: id
+            }
         }
     )
 
-    // Verificando se o carro foi criado
     let carroAtualizado = await Carro.findByPk(id)
     res.json(carroAtualizado)
 })
 
-// GET http://localhost:3000/carro => Read
-// GET http://localhost:3000/carro?id=XX => Read
-// GET http://localhost:3000/carro?marca=XX => Read
-// GET http://localhost:3000/carro?marca=XX&modelo=XX => Read
-// GET http://localhost:3000/carro?anoInicial=XX => Read
-// GET http://localhost:3000/carro?valorInicial=XX => Read
-// LER
+// GET http://localhost:3000/ec021/carro?marca=XX => Read
+// GET http://localhost:3000/ec021/carro?marca=XX&modelo=XX => Read
+// GET http://localhost:3000/ec021/carro?anoInicial=XX => Read
+// GET http://localhost:3000/ec021/carro?valorInicial=XX => Read
 server.get(`${CARRO}`, async (req, res) => {
     let id = req.query.id
-    let marca = req.body.marca
-    let modelo = req.body.modelo
-    let ano = req.body.ano
-    let valor = req.body.valor
-    //let data_cadastro = req.body.data_cadastro
-    
-    // Busca por ID
+    let marca = req.query.marca
+    let modelo = req.query.modelo
+    let anoInicial = req.query.anoInicial
+    let valorInicial = req.query.valorInicial
+
     if (id) {
         let carro = await Carro.findByPk(id)
         res.json(carro)
     }
 
-    // Busca por MARCA
+    // Busca por MARCA & MODELO
+    else if (marca && modelo) {
+        let carro = await Carro.findAll(
+            {
+                where:
+                { 
+                    [Op.and] :
+                    [
+                        { marca : marca},
+                        { modelo : modelo}
+                    ]
+                }
+            }
+        )
+        res.json(carro)
+    }
+
     else if (marca) {
         let carro = await Carro.findAll(
             {
-                where: { marca:marca }
+                where:
+                {
+                    marca:marca
+                }
             }
         )
         res.json(carro)
     }
 
-    // Busca por MARCA e MODELO
-    else if (marca & modelo) {
+    else if (anoInicial) {
         let carro = await Carro.findAll(
             {
-                where: { marca:marca, modelo:modelo }
+                where: 
+                {
+                    ano: 
+                    { 
+                        [Op.gte] : anoInicial
+                    }
+                }
             }
         )
         res.json(carro)
     }
 
-    // Busca por ANO INICIAL (ano MAIOR ou IGUAL ao ano passado)
-    else if (ano) {
+    else if (valorInicial) {
         let carro = await Carro.findAll(
             {
-                where: { ano:ano }
+                where: 
+                {
+                    valor: 
+                    { 
+                        [Op.gte] : valorInicial
+                    }
+                }
             }
         )
         res.json(carro)
     }
 
-    // Busca por VALOR INICIAL (valor MAIOR ou IGUAL ao valor passado)
-    else if (valor) {
-        let carro = await Carro.findAll(
-            {
-                where: { valor:valor }
-            }
-        )
+    else {
+        // Buscando TODOS os carros
+        let carro = await Carro.findAll()
         res.json(carro)
-    }
-
-    // else if (data_cadastro) {
-        
-    //     let carro = await Carro.findAll(
-    //         {
-    //             where: { data_cadastro:data_cadastro }
-    //         }
-    //     )
-    //     res.json(carro)
-    // }
-
-    // Busca TODOS os carros
-    let carro = await Carro.findAll()
-    res.json(carro)
-    
+    }   
+   
 })
 
-// DELETE http://localhost:3000/carro/{id} => Delete
-/*
-O Delete também precisa do ID, pois é por ele que será feito a remoção do elemento
-*/
-// DELETAR
 server.del(`${CARRO}/:id`, async (req, res) => {
     let id = req.params.id
 
